@@ -2,12 +2,14 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import Loader from "./loader";
-
 import Scene from "./_scene.js";
+import Post from "./_post";
 
 export default class Gl {
   constructor(sel) {
-    this.renderer = new THREE.WebGLRenderer({});
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+    });
 
     this.vp = {
       w: window.innerWidth,
@@ -19,6 +21,7 @@ export default class Gl {
     this.renderer.setPixelRatio(this.vp.pixelRatio);
     this.renderer.setSize(this.vp.w, this.vp.h);
     this.renderer.setClearColor(0x000000, 1);
+    this.renderer.logarithmicDepthBuffer = true;
 
     this.vp.container.appendChild(this.renderer.domElement);
 
@@ -29,7 +32,7 @@ export default class Gl {
       1000
     );
 
-    this.camera.position.set(0, 0, 2);
+    this.camera.position.set(0, 1, 3);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
     this.paused = false;
@@ -55,6 +58,9 @@ export default class Gl {
 
   create(data) {
     this.scene = new Scene(data);
+
+    // init post
+    this.post = new Post(this.renderer, this.scene, this.camera);
   }
 
   /** -----  Render */
@@ -64,12 +70,16 @@ export default class Gl {
 
     this.renderChild(this.time);
 
+    this.post.isActive
+      ? this.post.render(this.time)
+      : this.renderer.render(this.scene, this.camera);
+
+    // this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render.bind(this));
-    this.renderer.render(this.scene, this.camera);
   }
 
   renderChild(t = 0) {
-    if (this.scene && this.scene.render) this.scene.render(t);
+    if (this.scene) this.scene.render(t);
   }
 
   resize() {

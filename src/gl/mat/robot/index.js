@@ -1,4 +1,4 @@
-import { ShaderMaterial, DoubleSide } from "three";
+import { ShaderMaterial, DoubleSide, FrontSide } from "three";
 
 import vertexShader from "./vertex.vert";
 import fragmentShader from "./fragment.frag";
@@ -15,9 +15,9 @@ export default class extends ShaderMaterial {
       u_t1: { value: options?.u_t1 || null },
     };
 
-    this.side = DoubleSide;
-    // this.wireframe= true;
-    // this.transparent= true;
+    this.side = FrontSide;
+    // this.wireframe = true;
+    // this.transparent = true;
   }
 
   set time(t) {

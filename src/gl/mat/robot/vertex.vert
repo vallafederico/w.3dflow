@@ -5,7 +5,7 @@ uniform float u_time;
 varying vec2 v_uv;
 
 void main() {
-  // #include <uv_vertex>
+  #include <uv_vertex>
   #include <skinbase_vertex>
 
 
