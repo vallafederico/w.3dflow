@@ -8,8 +8,6 @@ export default class extends Group {
     this.data = data;
     this.shouldRedner = true;
 
-    // console.log(data);
-
     this.create();
   }
 
@@ -23,7 +21,8 @@ export default class extends Group {
 
     this.add(this.model);
 
-    this.skin = new Skin(this.model, this.data.m_robot.anim);
+    if (this.data.m_robot.anim)
+      this.skin = new Skin(this.model, this.data.m_robot.anim);
   }
 
   render(t) {

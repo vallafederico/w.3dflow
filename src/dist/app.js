@@ -529,9 +529,7 @@ var _post = require("./_post");
 var _postDefault = parcelHelpers.interopDefault(_post);
 class Gl {
     constructor(sel){
-        this.renderer = new _three.WebGLRenderer({
-            antialias: true
-        });
+        this.renderer = new _three.WebGLRenderer({});
         this.vp = {
             w: window.innerWidth,
             h: window.innerHeight,
@@ -541,7 +539,7 @@ class Gl {
         this.renderer.setPixelRatio(this.vp.pixelRatio);
         this.renderer.setSize(this.vp.w, this.vp.h);
         this.renderer.setClearColor(0x000000, 1);
-        this.renderer.logarithmicDepthBuffer = true;
+        this.renderer.logarithmicDepthBuffer = false;
         this.vp.container.appendChild(this.renderer.domElement);
         this.camera = new _three.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 1000);
         this.camera.position.set(0, 1, 3);
@@ -29685,7 +29683,6 @@ exports.default = class extends (0, _three.Group) {
         super();
         this.data = data;
         this.shouldRedner = true;
-        // console.log(data);
         this.create();
     }
     create() {
@@ -29695,7 +29692,7 @@ exports.default = class extends (0, _three.Group) {
         this.model = this.loop(this.data.m_robot.model);
         this.position.y = -0.5;
         this.add(this.model);
-        this.skin = new (0, _skinDefault.default)(this.model, this.data.m_robot.anim);
+        if (this.data.m_robot.anim) this.skin = new (0, _skinDefault.default)(this.model, this.data.m_robot.anim);
     }
     render(t) {
         if (!this.shouldRedner) return;
@@ -29736,9 +29733,9 @@ exports.default = class extends (0, _three.ShaderMaterial) {
                 value: options?.u_t1 || null
             }
         };
-        this.side = (0, _three.FrontSide);
-    // this.wireframe = true;
-    // this.transparent = true;
+        this.side = (0, _three.DoubleSide);
+        // this.wireframe = true;
+        this.transparent = true;
     }
     set time(t) {
         this.uniforms.u_time.value = t;
@@ -29746,10 +29743,10 @@ exports.default = class extends (0, _three.ShaderMaterial) {
 };
 
 },{"three":"ktPTu","./vertex.vert":"bZN8H","./fragment.frag":"3wDCe","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bZN8H":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\n// #include <morphtarget_pars_vertex>\n#include <skinning_pars_vertex>\n\nuniform float u_time;\nvarying vec2 v_uv;\n\nvoid main() {\n  #include <uv_vertex>\n  #include <skinbase_vertex>\n\n  vec4 tr = modelViewMatrix * vec4(position, 1.0);\n  // gl_Position = projectionMatrix * tr;\n  v_uv = uv;\n\n  #include <begin_vertex>\n  // #include <morphtarget_vertex>\n  #include <skinning_vertex>\n  #include <project_vertex>\n  #include <worldpos_vertex>\n\n}";
+module.exports = "#define GLSLIFY 1\n#include <morphtarget_pars_vertex>\n#include <skinning_pars_vertex>\n\nuniform float u_time;\nvarying vec2 v_uv;\nvarying vec3 v_normal;\n\nvoid main() {\n  #include <uv_vertex>\n  #include <skinbase_vertex>\n  #include <begin_vertex>\n\n  vec4 tr = modelViewMatrix * vec4(position, 1.0);\n  // gl_Position = projectionMatrix * tr;\n  v_uv = uv;\n  v_normal = normal;\n\n  \n  #include <morphtarget_vertex>\n  #include <skinning_vertex>\n  #include <project_vertex>\n  #include <worldpos_vertex>\n\n}";
 
 },{}],"3wDCe":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\nuniform float u_time;\nuniform sampler2D u_t1; \n\nvarying vec2 v_uv;\n\nvoid main() {\n\n  vec3 img = texture2D(u_t1, v_uv).rgb;\n\n  gl_FragColor = vec4(img, 1.);\n  // gl_FragColor = vec4(1., 0., 0., 1.);\n}\n";
+module.exports = "#define GLSLIFY 1\nuniform float u_time;\nuniform sampler2D u_t1; \n\nvarying vec2 v_uv;\nvarying vec3 v_normal;\n\nvoid main() {\n\n  vec3 img = texture2D(u_t1, v_uv).rgb;\n\n  // float ptl = dot(normalize(vec3(1., 1., 1.)), v_normal);\n  // img -= ptl * .1;\n\n  gl_FragColor = vec4(img, 1.);\n  // gl_FragColor = vec4(1., 0., 0., 1.);\n}\n";
 
 },{}],"ayBz5":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -29765,7 +29762,7 @@ exports.default = class {
             currInd: 0,
             currAct: null
         };
-    // this.loopSingle(0, 0.1);
+        this.loopSingle(0, 0.5);
     }
     /** -------- Play */ play(index = 0, transitionDuration = 2) {
         if (index === this.a.curr) return;
@@ -32333,7 +32330,9 @@ parcelHelpers.defineInteropFlag(exports);
 var _three = require("three");
 var _effectComposerJs = require("three/examples/jsm/postprocessing/EffectComposer.js");
 var _renderPassJs = require("three/examples/jsm/postprocessing/RenderPass.js");
+var _shaderPassJs = require("three/examples/jsm/postprocessing/ShaderPass.js");
 var _unrealBloomPassJs = require("three/examples/jsm/postprocessing/UnrealBloomPass.js");
+var _base = require("./matpp/_base");
 exports.default = class {
     constructor(renderer, scene, camera){
         this.isActive = false;
@@ -32346,7 +32345,8 @@ exports.default = class {
     create() {
         this.rpass = new (0, _renderPassJs.RenderPass)(this.scene, this.camera);
         this.composer.addPass(this.rpass);
-        this.composer.addPass(this.createBloom());
+    // this.composer.addPass(this.createBase());
+    // this.composer.addPass(this.createBloom());
     }
     render(t) {
         if (!this.isActive) return;
@@ -32356,16 +32356,20 @@ exports.default = class {
         const multiplier = 1;
         const params = {
             size: new (0, _three.Vector2)(window.innerWidth * multiplier, window.innerHeight * multiplier),
-            strength: 1,
+            strength: 0,
             threshold: 0.9999,
             radius: 0.1
         };
         this.bloomPass = new (0, _unrealBloomPassJs.UnrealBloomPass)(params.size, params.strength, params.threshold, params.radius);
         return this.bloomPass;
     }
+    createBase() {
+        this.basePass = new (0, _shaderPassJs.ShaderPass)((0, _base.BaseShader));
+        return this.basePass;
+    }
 };
 
-},{"three":"ktPTu","three/examples/jsm/postprocessing/EffectComposer.js":"e5jie","three/examples/jsm/postprocessing/RenderPass.js":"hXnUO","three/examples/jsm/postprocessing/UnrealBloomPass.js":"3iDYE","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"e5jie":[function(require,module,exports) {
+},{"three":"ktPTu","three/examples/jsm/postprocessing/EffectComposer.js":"e5jie","three/examples/jsm/postprocessing/RenderPass.js":"hXnUO","three/examples/jsm/postprocessing/UnrealBloomPass.js":"3iDYE","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./matpp/_base":"86Rzf","three/examples/jsm/postprocessing/ShaderPass.js":"5IxTN"}],"e5jie":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "EffectComposer", ()=>EffectComposer);
@@ -33177,6 +33181,33 @@ var _three = require("three");
 		}`
 };
 
-},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["luC0q","hoI2P"], "hoI2P", "parcelRequire94c2")
+},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"86Rzf":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "BaseShader", ()=>BaseShader);
+var _fragmentFrag = require("./fragment.frag");
+var _fragmentFragDefault = parcelHelpers.interopDefault(_fragmentFrag);
+var _vertexVert = require("./vertex.vert");
+var _vertexVertDefault = parcelHelpers.interopDefault(_vertexVert);
+const BaseShader = {
+    uniforms: {
+        tDiffuse: {
+            value: null
+        },
+        u_time: {
+            value: 0.0
+        }
+    },
+    vertexShader: (0, _vertexVertDefault.default),
+    fragmentShader: (0, _fragmentFragDefault.default)
+};
+
+},{"./fragment.frag":"aVoaN","./vertex.vert":"grLHn","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"aVoaN":[function(require,module,exports) {
+module.exports = "#define GLSLIFY 1\n#include <common>\n\nuniform sampler2D tDiffuse;\nuniform float u_time;\nvarying vec2 v_uv;\n\nvoid main() {\n    vec3 tx = texture2D( tDiffuse, v_uv ).rgb;\n\n    gl_FragColor.rgb = tx;\n    gl_FragColor.a = 1.;\n}";
+
+},{}],"grLHn":[function(require,module,exports) {
+module.exports = "#define GLSLIFY 1\nvarying vec2 v_uv;\n\nvoid main() {\n    v_uv = uv;\n    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n}";
+
+},{}]},["luC0q","hoI2P"], "hoI2P", "parcelRequire94c2")
 
 //# sourceMappingURL=app.js.map

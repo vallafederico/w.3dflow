@@ -1,7 +1,10 @@
 import { Vector2 } from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { BaseShader } from "./matpp/_base";
 
 export default class {
   constructor(renderer, scene, camera) {
@@ -19,7 +22,8 @@ export default class {
     this.rpass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(this.rpass);
 
-    this.composer.addPass(this.createBloom());
+    // this.composer.addPass(this.createBase());
+    // this.composer.addPass(this.createBloom());
   }
 
   render(t) {
@@ -37,7 +41,7 @@ export default class {
         window.innerWidth * multiplier,
         window.innerHeight * multiplier
       ),
-      strength: 1,
+      strength: 0,
       threshold: 0.9999,
       radius: 0.1,
     };
@@ -50,5 +54,10 @@ export default class {
     );
 
     return this.bloomPass;
+  }
+
+  createBase() {
+    this.basePass = new ShaderPass(BaseShader);
+    return this.basePass;
   }
 }

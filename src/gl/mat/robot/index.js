@@ -15,9 +15,9 @@ export default class extends ShaderMaterial {
       u_t1: { value: options?.u_t1 || null },
     };
 
-    this.side = FrontSide;
+    this.side = DoubleSide;
     // this.wireframe = true;
-    // this.transparent = true;
+    this.transparent = true;
   }
 
   set time(t) {

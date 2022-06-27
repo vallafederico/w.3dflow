@@ -7,9 +7,7 @@ import Post from "./_post";
 
 export default class Gl {
   constructor(sel) {
-    this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
-    });
+    this.renderer = new THREE.WebGLRenderer({});
 
     this.vp = {
       w: window.innerWidth,
@@ -21,7 +19,7 @@ export default class Gl {
     this.renderer.setPixelRatio(this.vp.pixelRatio);
     this.renderer.setSize(this.vp.w, this.vp.h);
     this.renderer.setClearColor(0x000000, 1);
-    this.renderer.logarithmicDepthBuffer = true;
+    this.renderer.logarithmicDepthBuffer = false;
 
     this.vp.container.appendChild(this.renderer.domElement);
 
