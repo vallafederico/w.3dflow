@@ -32317,7 +32317,7 @@ exports.default = class {
             currInd: 0,
             currAct: null
         };
-    // this.loopSingle(0, 0.5);
+        this.loopSingle(0, 0.5);
     }
     /** -------- Play */ play(index = 0, transitionDuration = 2) {
         if (index === this.a.curr) return;
@@ -32372,7 +32372,7 @@ exports.default = class {
         this.rpass = new (0, _renderPassJs.RenderPass)(this.scene, this.camera);
         this.composer.addPass(this.rpass);
         // this.composer.addPass(this.createNoise());
-        // this.composer.addPass(this.createBloom());
+        this.composer.addPass(this.createBloom());
         this.composer.addPass(this.createBokeh());
     }
     render(t, { x , y  }) {
@@ -32386,7 +32386,7 @@ exports.default = class {
         const multiplier = 1;
         const params = {
             size: new (0, _three.Vector2)(window.innerWidth * multiplier, window.innerHeight * multiplier),
-            strength: 0.8,
+            strength: 0.5,
             threshold: 0.7,
             radius: 0.01
         };

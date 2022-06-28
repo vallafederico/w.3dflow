@@ -25,7 +25,7 @@ export default class {
 
     // this.composer.addPass(this.createNoise());
 
-    // this.composer.addPass(this.createBloom());
+    this.composer.addPass(this.createBloom());
     this.composer.addPass(this.createBokeh());
   }
 
@@ -48,7 +48,7 @@ export default class {
         window.innerWidth * multiplier,
         window.innerHeight * multiplier
       ),
-      strength: 0.8,
+      strength: 0.5,
       threshold: 0.7,
       radius: 0.01,
     };

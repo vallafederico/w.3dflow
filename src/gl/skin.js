@@ -12,7 +12,7 @@ export default class {
       currAct: null,
     };
 
-    // this.loopSingle(0, 0.5);
+    this.loopSingle(0, 0.5);
   }
 
   /** -------- Play */
