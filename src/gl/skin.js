@@ -12,7 +12,7 @@ export default class {
       currAct: null,
     };
 
-    this.loopSingle(0, 0.5);
+    // this.loopSingle(0, 0.5);
   }
 
   /** -------- Play */
@@ -46,19 +46,28 @@ export default class {
   }
 
   /** -------- Render */
-
   tick(time) {
     const t = this.clock.getDelta();
-
     this.mixer.update(t);
   }
 
   /** -------- Utils */
-  findBone(name) {
+  findBone(name = undefined) {
     this.bones = {};
-    this.mesh.traverse((o) => {
-      if (o.isBone && o.name === name) this.bones.re = o;
-    });
+
+    if (!name) {
+      this.mesh.traverse((o) => {
+        if (o.isBone && o.name.substring(0, 3) === "bb_") {
+          this.bones[o.name] = o;
+        }
+      });
+    } else {
+      this.mesh.traverse((o) => {
+        if (o.isBone && o.name === name) {
+          this.bones[o.name] = o;
+        }
+      });
+    }
 
     return this.bones;
   }

@@ -4,11 +4,12 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-import { BaseShader } from "./matpp/_base";
+import { BokehPass } from "three/examples/jsm/postprocessing/BokehPass.js";
+import { NoiseShader } from "./matpp/noise";
 
 export default class {
   constructor(renderer, scene, camera) {
-    this.isActive = false;
+    this.isActive = true;
     // console.log(renderer, scene, camera);
 
     this.scene = scene;
@@ -22,12 +23,18 @@ export default class {
     this.rpass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(this.rpass);
 
-    // this.composer.addPass(this.createBase());
+    // this.composer.addPass(this.createNoise());
+
     // this.composer.addPass(this.createBloom());
+    this.composer.addPass(this.createBokeh());
   }
 
-  render(t) {
+  render(t, { x, y }) {
     if (!this.isActive) return;
+
+    if (this.bokehPass) this.bokehPass.uniforms.focus.value = 2.5 + y * 3;
+    // if (this.bloomPass) this.bloomPass.threshold = 0.7 + y;
+    if (this.noisePass) this.noisePass.uniforms.u_time.value = t;
 
     this.composer.render(t);
   }
@@ -41,9 +48,9 @@ export default class {
         window.innerWidth * multiplier,
         window.innerHeight * multiplier
       ),
-      strength: 0,
-      threshold: 0.9999,
-      radius: 0.1,
+      strength: 0.8,
+      threshold: 0.7,
+      radius: 0.01,
     };
 
     this.bloomPass = new UnrealBloomPass(
@@ -53,11 +60,37 @@ export default class {
       params.radius
     );
 
+    // console.log(this.bloomPass);
     return this.bloomPass;
   }
 
-  createBase() {
-    this.basePass = new ShaderPass(BaseShader);
-    return this.basePass;
+  createBokeh() {
+    const params = {
+      focus: 2.5,
+      aperture: 0.001,
+      maxblur: 0.01,
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+
+    this.bokehPass = new BokehPass(this.scene, this.camera, params);
+
+    // console.log(this.bokehPass);
+    return this.bokehPass;
+  }
+
+  createNoise() {
+    this.noisePass = new ShaderPass(NoiseShader);
+
+    // console.log(this.noisePass);
+    return this.noisePass;
   }
 }
+
+/**
+ * --- NOTES
+ * on BokehPass
+ * _ focus is @ 2.5
+ *
+ *
+ */

@@ -19,15 +19,15 @@ export default class Gl {
     this.renderer.setPixelRatio(this.vp.pixelRatio);
     this.renderer.setSize(this.vp.w, this.vp.h);
     this.renderer.setClearColor(0x000000, 1);
-    this.renderer.logarithmicDepthBuffer = false;
+    this.renderer.logarithmicDepthBuffer = true;
 
     this.vp.container.appendChild(this.renderer.domElement);
 
     this.camera = new THREE.PerspectiveCamera(
       70,
       window.innerWidth / window.innerHeight,
-      0.001,
-      1000
+      0.1,
+      10
     );
 
     this.camera.position.set(0, 1, 3);
@@ -35,6 +35,7 @@ export default class Gl {
 
     this.paused = false;
     this.time = 0;
+    this.mouse = { x: 0, y: 0, nx: 0, ny: 0 };
 
     this.load();
   }
@@ -66,18 +67,18 @@ export default class Gl {
     if (this.paused) return;
     this.time += 0.05;
 
-    this.renderChild(this.time);
+    this.renderChild(this.time, this.mouse);
 
     this.post.isActive
-      ? this.post.render(this.time)
+      ? this.post.render(this.time, this.mouse)
       : this.renderer.render(this.scene, this.camera);
 
     // this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render.bind(this));
   }
 
-  renderChild(t = 0) {
-    if (this.scene) this.scene.render(t);
+  renderChild(t = 0, mouse) {
+    if (this.scene) this.scene.render(t, mouse);
   }
 
   resize() {
@@ -98,18 +99,24 @@ export default class Gl {
 
   /** -----  Events */
   initEvents() {
-    // resize
+    // ** -- Resize
     new ResizeObserver((entry) => this.resize(entry[0].contentRect)).observe(
       this.vp.container
     );
-    // tab
+
+    // ** -- Tab Performance
     document.addEventListener("visibilitychange", () => {
       document.hidden ? (this.paused = true) : (this.paused = false);
+    });
+
+    // ** -- Mouse
+    document.addEventListener("mousemove", (e) => {
+      this.mouse.x = (e.clientX / this.vp.w) * 2 - 1;
+      this.mouse.y = (e.clientY / this.vp.h) * 2 - 1;
     });
   }
 
   /** -----  Utils */
-
   get viewSize() {
     const fovInRad = (this.camera.fov * Math.PI) / 180;
     const height = Math.abs(

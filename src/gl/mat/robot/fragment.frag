@@ -9,9 +9,6 @@ void main() {
 
   vec3 img = texture2D(u_t1, v_uv).rgb;
 
-  // float ptl = dot(normalize(vec3(1., 1., 1.)), v_normal);
-  // img -= ptl * .1;
-
   gl_FragColor = vec4(img, 1.);
   // gl_FragColor = vec4(1., 0., 0., 1.);
 }

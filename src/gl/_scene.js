@@ -19,9 +19,9 @@ export default class extends Scene {
   /** Pass
    */
 
-  render(t) {
+  render(t, mouse) {
     if (!this.shouldRender) return;
-    if (this.robot) this.robot.render(t);
+    if (this.robot) this.robot.render(t, mouse);
 
     // console.log(t);
   }
